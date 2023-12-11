@@ -62,6 +62,16 @@ pub const Shared = struct {
 
     pub const Input = Inputs;
 
+    pub const Camera = struct {
+        var cam: raylib.Camera2D = undefined;
+        pub inline fn init() void {
+            cam = raylib.Camera2D(0);
+        }
+        pub inline fn Get() raylib.Camera2D {
+            return cam;
+        }
+    };
+
     pub const Color = Colors;
 
     pub const Helpers = Helpers_;

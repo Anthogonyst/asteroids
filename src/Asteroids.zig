@@ -80,6 +80,8 @@ pub inline fn main() void {
 
     Shared.Log.Info("Begin Game Loop");
     while (!raylib.windowShouldClose()) {
+        Shared.Camera.zoom = 2;
+        
         raylib.beginDrawing();
         defer raylib.endDrawing();
 
