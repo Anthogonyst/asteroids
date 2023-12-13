@@ -59,7 +59,7 @@
 		const updateSize = (): void => {
 			const updateWasmResolution = emscripten?._updateWasmResolution;
 			if (updateWasmResolution) {
-				const resolution = fitInto16x9AspectRatio(
+				const resolution = fitInto4x3AspectRatio(
 					override?.width ?? window.innerWidth,
 					override?.height ?? window.innerHeight
 				);
@@ -79,6 +79,22 @@
 		originalHeight: number
 	): { width: number; height: number } {
 		const targetAspectRatio = 16 / 9;
+		const currentAspectRatio = originalWidth / originalHeight;
+
+		if (currentAspectRatio > targetAspectRatio) {
+			const newWidth = originalHeight * targetAspectRatio;
+			return { width: newWidth, height: originalHeight };
+		} else {
+			const newHeight = originalWidth / targetAspectRatio;
+			return { width: originalWidth, height: newHeight };
+		}
+	}
+
+	function fitInto4x3AspectRatio(
+		originalWidth: number,
+		originalHeight: number
+	): { width: number; height: number } {
+		const targetAspectRatio = 4 / 3;
 		const currentAspectRatio = originalWidth / originalHeight;
 
 		if (currentAspectRatio > targetAspectRatio) {

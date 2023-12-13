@@ -148,7 +148,7 @@ pub const Settings = struct {
     const settingsFile = "settings.json";
 
     const default_settings = Settings{
-        .CurrentResolution = Resolution{ .Width = 1600, .Height = 900 },
+        .CurrentResolution = Resolution{ .Width = 640, .Height = 480 },
         .TargetFPS = 60,
         .Debug = false,
         .DebugView = null,
