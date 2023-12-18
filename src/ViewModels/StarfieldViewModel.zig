@@ -8,7 +8,7 @@ const SettingsManager = @import("../Settings.zig").Settings;
 pub const StarfieldViewModel = Shared.View.ViewModel.Create(
     struct {
         // Define Constants
-        pub const STARS_COUNT: i32 = 100;
+        pub const STARS_COUNT: i32 = 800;
         const randomSeeded = false;
         const fixedSeed: f32 = 42;
 
@@ -38,10 +38,14 @@ pub const StarfieldViewModel = Shared.View.ViewModel.Create(
             // Initialization shoot
             for (0..STARS_COUNT) |i| {
                 starfield[i] = raymath.matrixIdentity();
-                starfield[i] = raymath.matrixTranslate(
-                    @rem(Shared.Random.Get().float(f32), 1000),
-                    @rem(Shared.Random.Get().float(f32), 1000),
-                    @rem(Shared.Random.Get().float(f32), 1)
+                starfield[i] = raymath.matrixMultiply(
+                    starfield[i],
+                    raymath.matrixTranslate(
+                        // TODO: Incorporate Resolution targets in View instead
+                        Shared.Random.Get().float(f32) * 2000 - 1000,
+                        Shared.Random.Get().float(f32) * 2000 - 1000,
+                        Shared.Random.Get().float(f32)
+                    )
                 );
 
                 starsPosition[i] = raylib.Vector2.init(
