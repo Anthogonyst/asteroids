@@ -4,6 +4,7 @@ const raylib = @import("raylib");
 const raymath = @import("raylib-math");
 //const RndGen = std.rand.DefaultPrng;
 const SettingsManager = @import("../Settings.zig").Settings;
+const Camera = @import("../Models/Cam2D.zig").Camera;
 
 pub const StarfieldViewModel = Shared.View.ViewModel.Create(
     struct {
@@ -27,6 +28,8 @@ pub const StarfieldViewModel = Shared.View.ViewModel.Create(
             //const width = SettingsManager.Resolution.Width;
             //const height = SettingsManager.Resolution.Height;
             screenSize = Shared.Helpers.GetCurrentScreenSize();
+            const cam = Camera.Cam2D.init();
+            _ = cam;
 
 //            if (randomSeeded) {
 //                rand.* = &Shared.Random.Get();

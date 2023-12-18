@@ -26,6 +26,9 @@ pub const ViewLocator = struct {
             Views.Game_Over => {
                 return @import("./Views/GameOverView.zig").GameOverView;
             },
+            Views.Starfield => {
+                return @import("./Views/StarfieldView.zig").StarfieldView;
+            },
             else => {
                 return BaseView{ .DrawRoutine = DrawQuit };
             },
@@ -55,5 +58,6 @@ pub const Views = enum {
     Paused,
     Settings,
     Game_Over,
+    Starfield,
     Quit,
 };

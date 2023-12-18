@@ -143,7 +143,7 @@ inline fn GetSelection() Shared.View.Views {
             return .Asteroids;
         },
         Selection.Settings => {
-            return .Settings;
+            return .Starfield;
         },
         Selection.Quit => {
             return .Quit;
