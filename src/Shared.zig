@@ -19,6 +19,7 @@ const VM = @import("./ViewModels/ViewModel.zig").ViewModel;
 const Colors = @import("Colors.zig").Colors;
 const Helpers_ = @import("Helpers.zig").Helpers;
 const RndGen = std.rand.DefaultPrng;
+const Sprites = @import("Sprite.zig").Sprite;
 
 pub const Shared = struct {
     const Alloc = struct {
@@ -66,10 +67,21 @@ pub const Shared = struct {
 
     pub const Helpers = Helpers_;
 
+    pub const Time = struct {
+        extern fn WASMTimestamp() i64;
+
+        pub inline fn getTimestamp() i64 {
+            if (builtin.os.tag == .wasi) {
+                return WASMTimestamp();
+            }
+            return std.time.milliTimestamp();
+        }
+    };
+
     pub const Random = struct {
         var random: std.rand.Random = undefined;
         pub inline fn init() void {
-            const now: u64 = @intCast(std.time.microTimestamp());
+            const now: u64 = @intCast(Time.getTimestamp());
             var rng = RndGen.init(now);
             random = rng.random();
         }
@@ -99,6 +111,8 @@ pub const Shared = struct {
             };
         }
     };
+
+    pub const Sprite = Sprites;
 
     pub const Sound = struct {
         pub const Sounds = AssetManager.Sounds;

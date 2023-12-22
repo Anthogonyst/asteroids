@@ -12,6 +12,7 @@ pub const AssetManager = struct {
 
     pub const Textures = enum {
         Unknown,
+        Meteor,
     };
 
     pub const Sounds = enum {
@@ -20,6 +21,7 @@ pub const AssetManager = struct {
 
     pub const Musics = enum {
         Unknown,
+        test_,
     };
 
     pub const Fonts = enum {
@@ -30,6 +32,9 @@ pub const AssetManager = struct {
         switch (key) {
             Textures.Unknown => {
                 return AssetManagerErrors.NotFound;
+            },
+            .Meteor => {
+                return RawAsset.init("./Textures/Yellow Meteor.png");
             },
         }
     }
@@ -46,6 +51,9 @@ pub const AssetManager = struct {
         switch (key) {
             Musics.Unknown => {
                 return AssetManagerErrors.NotFound;
+            },
+            .test_ => {
+                return RawAsset.init("./Music/test.ogg");
             },
         }
     }
@@ -92,19 +100,19 @@ pub const AssetManager = struct {
             },
             Assets.Font => {
                 const f = try GetFontAsset(key);
-                return LoadFromCacheFirst(E, T, LoadedFonts, key, LoadFont(f));
+                return LoadFromCacheFirst(E, T, &LoadedFonts, key, f, LoadFont);
             },
             Assets.Music => {
-                const m = GetMusicAsset(key);
-                return LoadFromCacheFirst(E, T, LoadedMusic, key, LoadMusic(m));
+                const m = try GetMusicAsset(key);
+                return LoadFromCacheFirst(E, T, &LoadedMusic, key, m, LoadMusic);
             },
             Assets.Sound => {
-                const s = GetSoundAsset(key);
-                return LoadFromCacheFirst(E, T, LoadedSounds, key, LoadSound(s));
+                const s = try GetSoundAsset(key);
+                return LoadFromCacheFirst(E, T, &LoadedSounds, key, s, LoadSound);
             },
             Assets.Texture => {
-                const t = GetTextureAsset(key);
-                return LoadFromCacheFirst(E, T, LoadedTextures, key, LoadTexture(t));
+                const t = try GetTextureAsset(key);
+                return LoadFromCacheFirst(E, T, &LoadedTextures, key, t, LoadTexture);
             },
         }
     }
@@ -112,20 +120,21 @@ pub const AssetManager = struct {
     inline fn LoadFromCacheFirst(
         comptime E: type,
         comptime T: type,
-        map: std.EnumMap(E, T),
+        map: *std.EnumMap(E, T),
         key: E,
-        loadFn: *fn (rawAsset: RawAsset) AssetManagerErrors!T,
+        rawAsset: RawAsset,
+        loadFn: *const fn (rawAsset: RawAsset) T,
     ) AssetManagerErrors!T {
         if (map.contains(key)) {
-            return map.get(key);
+            return map.get(key).?;
         }
 
-        const loadedAsset = try loadFn(key);
+        const loadedAsset = loadFn(rawAsset);
         map.put(key, loadedAsset);
         return loadedAsset;
     }
 
-    inline fn LoadTexture(asset: RawAsset) raylib.Texture {
+    fn LoadTexture(asset: RawAsset) raylib.Texture {
         const i = raylib.loadImageFromMemory(asset.FileType, asset.Bytes);
         const t = raylib.loadTextureFromImage(i);
         raylib.setTextureFilter(
@@ -135,18 +144,19 @@ pub const AssetManager = struct {
         return t;
     }
 
-    inline fn LoadSound(asset: RawAsset) raylib.Sound {
+    fn LoadSound(asset: RawAsset) raylib.Sound {
         const w = raylib.loadWaveFromMemory(asset.FileType, asset.Bytes);
         const s = raylib.loadSoundFromWave(w);
         return s;
     }
 
-    inline fn LoadMusic(asset: RawAsset) raylib.Music {
+    fn LoadMusic(asset: RawAsset) raylib.Music {
         const m = raylib.loadMusicStreamFromMemory(asset.FileType, asset.Bytes);
+
         return m;
     }
 
-    inline fn LoadFont(asset: RawAsset) raylib.Font {
+    fn LoadFont(asset: RawAsset) raylib.Font {
         var fontChars: [95]i32 = .{};
         inline for (0..fontChars.len) |i| fontChars[i] = @as(i32, @intCast(i)) + 32;
         const f = raylib.loadFontFromMemory(asset.FileType, asset.Bytes, 100, &fontChars);
@@ -158,15 +168,16 @@ pub const AssetManager = struct {
     }
 
     const RawAsset = struct {
-        pub const FileType: [:0]const u8 = undefined;
-        pub const Bytes: [:0]const u8 = undefined;
+        FileType: [:0]const u8,
+        Bytes: [:0]const u8,
 
         pub fn init(
-            fileType: [:0]const u8,
-            bytes: [:0]const u8,
-        ) void {
-            FileType = fileType;
-            Bytes = bytes;
+            comptime file: [:0]const u8,
+        ) RawAsset {
+            return RawAsset{
+                .FileType = file[file.len - 4 .. file.len],
+                .Bytes = @embedFile(file),
+            };
         }
     };
 };
